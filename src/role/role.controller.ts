@@ -26,12 +26,18 @@ export class RoleController {
     return this.roleService.findOne(+id);
   }
 
+  @Get(':id/users')
+  @ApiOperation({summary: 'Get users with according role.'})
+  getUsersWithAccordingRole(@Param('id') id: number){
+    return this.roleService.getUsersWithAccordingRole(+id);
+  }
+  
   @Patch(':id')
   @ApiOperation({summary: 'Update role by id.'})
   update(@Param('id') id: number, @Body() updateRoleDto: UpdateRoleDto) {
     return this.roleService.update(+id, updateRoleDto);
   }
-
+  
   @Delete(':id')
   @ApiOperation({summary: 'Delete role by id.'})
   remove(@Param('id') id: number) {

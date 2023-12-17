@@ -5,19 +5,19 @@ import { Post } from './entities/post.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { GetAllPostQueryDto } from './dto/get-all-post-query.dto';
-import { UserService } from 'src/user/user.service';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class PostService {
 
   constructor(
     @InjectRepository(Post) private readonly postRepository: Repository<Post>,
-    private readonly userService: UserService
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
   async create(createPostDto: CreatePostDto) {
 
-    const user = await this.userService.findOne(createPostDto.creator);
+    const user = await this.userRepository.findOneBy({id: createPostDto.creator});
     if(!user){
       return new BadRequestException('User not found')
     }
@@ -28,7 +28,6 @@ export class PostService {
     post.creator = createPostDto.creator;
     post.comments = [];
 
-    this.userService.addPostToUser(createPostDto.creator, post);
     return this.postRepository.save(post);
   }
 
@@ -47,11 +46,12 @@ export class PostService {
     return this.postRepository.find({relations: ['comments', 'creator'], skip: offset, take: limit});
   }
 
-  findOne(id: number): Promise<Post> {
-    return this.postRepository.findOne({
+  async findOne(id: number): Promise<Post> {
+    const receivedPost = await this.postRepository.findOne({
       where: {id},
       relations: ['comments', 'creator']
     });
+    return receivedPost;
   }
 
   async update(id: number, updatePostDto: UpdatePostDto): Promise<Post> {

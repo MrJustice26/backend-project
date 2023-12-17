@@ -41,4 +41,8 @@ export class RoleService {
   remove(id: number) {
     return this.roleRepository.delete({id});
   }
+
+  getUsersWithAccordingRole(id: number){
+    return this.roleRepository.query(`SELECT * FROM "user" INNER JOIN "role" ON "user"."roleId" = "role".id WHERE "user"."roleId" = ${id};`)
+  }
 }

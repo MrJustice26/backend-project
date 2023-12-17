@@ -3,6 +3,7 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiOperation } from '@nestjs/swagger';
+import { UpdateProfileDto } from 'src/profile/dto/update-profile.dto';
 
 @Controller('user')
 export class UserController {
@@ -30,6 +31,12 @@ export class UserController {
   @ApiOperation({summary: 'Update user by id.'})
   update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(+id, updateUserDto);
+  }
+
+  @Patch(":id/profile")
+  @ApiOperation({summary: 'Update user profile by id.'})
+  updateProfile(@Param('id') id: number, @Body() updateProfileDto: UpdateProfileDto) {
+    return this.userService.updateProfile(+id, updateProfileDto);
   }
 
   @Delete(':id')

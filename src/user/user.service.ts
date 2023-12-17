@@ -4,13 +4,18 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Post } from 'src/post/entities/post.entity';
+import { Role } from 'src/role/entities/role.entity';
+import { ProfileService } from 'src/profile/profile.service';
+import { CreateProfileDto } from 'src/profile/dto/create-profile.dto';
+import { UpdateProfileDto } from 'src/profile/dto/update-profile.dto';
 
 @Injectable()
 export class UserService {
 
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
+    @InjectRepository(Role) private readonly roleRepository: Repository<Role>,
+    private readonly profileService: ProfileService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -21,6 +26,7 @@ export class UserService {
       return new BadRequestException('User with the same username already exists');
     }
 
+
     const user = new User();
     user.username = createUserDto.username;
     user.password = createUserDto.password;
@@ -28,6 +34,17 @@ export class UserService {
     user.posts = [];
     user.comments = [];
     user.role = DEFAULT_USER_ROLE_ID;
+
+    user.profile = await this.profileService.create({
+      fullName: undefined,
+      city: undefined,
+      street: undefined,
+      houseNumber: undefined,
+      apartmentNumber: undefined,
+      phoneNumberWithCountryCode: undefined,
+      postalCode: undefined,
+    });
+
     return this.userRepository.save(user);
   }
 
@@ -36,35 +53,40 @@ export class UserService {
   }
 
   findOne(id: number) {
-    return this.userRepository.findOneBy({id});
+    return this.userRepository.findOne({
+      where: {id},
+      relations: ['posts', 'comments', 'role']
+    });
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    const user = await this.userRepository.findOneBy({id});
+    const user = await this.userRepository.findOne({
+      where: {id},
+      relations: ['posts', 'comments', 'role']
+    });
     if(!user){
       return new BadRequestException('User not found')
+    }
+
+    if(updateUserDto.role !== undefined){
+      const roleExist = await this.roleRepository.findOneBy({id: updateUserDto.role});
+      if(!roleExist){
+        return new BadRequestException('Role not found')
+      }
     }
 
     user.password = updateUserDto.password;
     user.avatarUrl = updateUserDto.avatarUrl;
     user.updatedAt = new Date().toISOString();
+    user.role = updateUserDto.role;
     return this.userRepository.save(user);
   }
 
   remove(id: number) {
     return this.userRepository.delete({id});
   }
-
-  async addPostToUser(id: number, post: Post){
-    const user = await this.userRepository.findOne({
-      where: {id},
-      relations: ['posts', 'comments']
-    })   
-    if(!user){
-      return new BadRequestException('User not found')
-    }
-
-    user.posts.push(post);
-    return this.userRepository.save(user);
+  
+  updateProfile(id: number, updateProfileDto: UpdateProfileDto) {
+    return this.profileService.update(id, updateProfileDto);
   }
 }

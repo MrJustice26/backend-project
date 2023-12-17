@@ -1,7 +1,8 @@
 import { Comment } from 'src/comment/entities/comment.entity';
 import { Post } from 'src/post/entities/post.entity';
+import { Profile } from 'src/profile/entities/profile.entity';
 import { Role } from 'src/role/entities/role.entity';
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class User {
@@ -32,5 +33,9 @@ export class User {
 
     @ManyToOne(() => Role, role => role.users)
     role: number;
+
+    @OneToOne(() => Profile, {eager: true})
+    @JoinColumn()
+    profile: Profile;
 
 }

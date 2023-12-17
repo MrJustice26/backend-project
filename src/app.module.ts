@@ -6,6 +6,7 @@ import { PostModule } from './post/post.module';
 import { RoleModule } from './role/role.module';
 import { UserModule } from './user/user.module';
 import { CommentModule } from './comment/comment.module';
+import { ProfileModule } from './profile/profile.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { CommentModule } from './comment/comment.module';
     RoleModule,
     UserModule,
     CommentModule,
+    ProfileModule,
   ],
   controllers: [AppController],
   providers: [AppService],
