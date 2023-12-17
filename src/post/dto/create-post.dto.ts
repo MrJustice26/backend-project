@@ -1,15 +1,19 @@
-import {IsString, IsNotEmpty, IsNumberString} from 'class-validator'
+import { ApiProperty } from '@nestjs/swagger';
+import {IsString, IsNotEmpty, IsNumber} from 'class-validator'
 
 export class CreatePostDto {
     @IsNotEmpty()
     @IsString()
+    @ApiProperty({description: 'The title of the post'})
     readonly title: string;
 
     @IsNotEmpty()
     @IsString()
+    @ApiProperty({description: 'The body of the post'})
     readonly body: string;
 
     @IsNotEmpty()
-    @IsNumberString()
+    @IsNumber()
+    @ApiProperty({description: 'The id of the user who created the post'})
     readonly creator: number;
 }

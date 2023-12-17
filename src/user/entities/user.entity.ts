@@ -18,7 +18,7 @@ export class User {
     @Column({type: 'timestamp with time zone', default: () => 'CURRENT_TIMESTAMP'})
     createdAt: string;
 
-    @Column({type: 'timestamp with time zone', default: () => 'CURRENT_TIMESTAMP'})
+    @Column({type: 'timestamp with time zone', nullable: true})
     updatedAt: string;
 
 }
