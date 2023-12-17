@@ -1,4 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from 'src/user/entities/user.entity';
+import { Comment } from 'src/comment/entities/comment.entity';
 
 @Entity()
 export class Post {
@@ -12,13 +14,15 @@ export class Post {
     @Column({type: 'text'})
     body: string;
 
-    @Column({type: 'integer'})
-    creator: number;
-
     @Column({type: 'timestamp with time zone', default: () => 'CURRENT_TIMESTAMP'})
     createdAt: string;
-
+    
     @Column({type: 'timestamp with time zone', nullable: true})
     updatedAt: string;
+    
+    @ManyToOne(() => User, user => user.posts)
+    creator: number;
 
+    @OneToMany(() => Comment, comment => comment.post)
+    comments: Comment[];
 }

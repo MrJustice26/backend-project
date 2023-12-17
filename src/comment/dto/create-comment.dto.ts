@@ -9,6 +9,11 @@ export class CreateCommentDto {
 
     @IsNotEmpty()
     @IsNumber()
-    @ApiProperty({description: 'The id of the post this comment belongs to'})
+    @ApiProperty({description: 'The id of the user who created the comment'})
     readonly creator: number;
+
+    @IsNotEmpty()
+    @IsNumber()
+    @ApiProperty({description: 'The id of the post this comment belongs to'})
+    readonly postId: number;
 }
