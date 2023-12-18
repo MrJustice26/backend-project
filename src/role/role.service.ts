@@ -4,6 +4,7 @@ import { UpdateRoleDto } from './dto/update-role.dto';
 import { Role } from './entities/role.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { isUndefined } from 'src/helpers/isUndefined';
 
 @Injectable()
 export class RoleService {
@@ -33,8 +34,9 @@ export class RoleService {
       return new BadRequestException('Role not found')
     }
     
-    role.title = updateRoleDto.title;
-    role.id = id;
+    if(!isUndefined(updateRoleDto.title)){
+      role.title = updateRoleDto.title;
+    }
     return this.roleRepository.save(role);
   }
 

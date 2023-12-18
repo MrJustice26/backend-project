@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {IsString, IsNotEmpty, IsOptional, Validate} from 'class-validator'
 import { UsernameFormatValidator } from '../validators/username.validator';
+import { PasswordFormatValidator } from '../validators/password.validator';
 
 export class CreateUserDto {
     @IsNotEmpty()
@@ -14,6 +15,7 @@ export class CreateUserDto {
     @IsNotEmpty()
     @IsString()
     @ApiProperty({description: 'The password of the user'})
+    @Validate(PasswordFormatValidator)
     readonly password: string;
 
     @IsOptional()

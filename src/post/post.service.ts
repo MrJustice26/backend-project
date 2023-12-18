@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { GetAllPostQueryDto } from './dto/get-all-post-query.dto';
 import { User } from 'src/user/entities/user.entity';
+import { isUndefined } from 'src/helpers/isUndefined';
 
 @Injectable()
 export class PostService {
@@ -60,9 +61,14 @@ export class PostService {
       new BadRequestException('Post not found');
     }
 
-    post.body = updatePostDto.body;
-    post.title = updatePostDto.title;
-    post.id = id;
+    if(!isUndefined(updatePostDto.body)){
+      post.body = updatePostDto.body;
+    }
+
+    if(!isUndefined(updatePostDto.title)){
+      post.title = updatePostDto.title;
+    }
+    
     post.updatedAt = new Date().toISOString();
     return this.postRepository.save(post);
   }

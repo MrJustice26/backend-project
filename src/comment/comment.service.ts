@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { Comment } from './entities/comment.entity';
 import { Post } from 'src/post/entities/post.entity';
 import { User } from 'src/user/entities/user.entity';
+import { isUndefined } from 'src/helpers/isUndefined';
 
 @Injectable()
 export class CommentService {
@@ -47,13 +48,20 @@ export class CommentService {
   }
 
   async update(id: number, updateCommentDto: UpdateCommentDto) {
-    const comment = await this.commentRepository.findOneBy({id});
+    const comment = await this.commentRepository.findOne({
+      where: {id}
+    });
     if(!comment){
       return new BadRequestException('Comment not found')
     }
     
-    comment.body = updateCommentDto.body;
-    comment.updatedAt = new Date().toISOString();
+    if(!isUndefined(updateCommentDto.body)){
+      comment.body = updateCommentDto.body;
+    }
+
+    if(!isUndefined(updateCommentDto.creator)){
+      comment.updatedAt = new Date().toISOString();
+    }
     return this.commentRepository.save(comment);
   }
 

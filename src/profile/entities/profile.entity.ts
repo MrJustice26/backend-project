@@ -14,11 +14,11 @@ export class Profile {
     @Column({ type: 'varchar', length: 100, nullable: true })
     street: string;
 
-    @Column({ type: 'varchar', length: 20, nullable: true })
-    houseNumber: string;
+    @Column({ type: 'integer', nullable: true })
+    houseNumber: number;
 
-    @Column({ type: 'varchar', length: 10, nullable: true })
-    apartmentNumber: string;
+    @Column({ type: 'integer', nullable: true })
+    apartmentNumber: number;
 
     @Column({ type: 'varchar', length: 100, nullable: true })
     city: string;

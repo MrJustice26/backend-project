@@ -8,6 +8,7 @@ import { Role } from 'src/role/entities/role.entity';
 import { ProfileService } from 'src/profile/profile.service';
 import { CreateProfileDto } from 'src/profile/dto/create-profile.dto';
 import { UpdateProfileDto } from 'src/profile/dto/update-profile.dto';
+import { isUndefined } from 'src/helpers/isUndefined';
 
 @Injectable()
 export class UserService {
@@ -75,10 +76,19 @@ export class UserService {
       }
     }
 
-    user.password = updateUserDto.password;
-    user.avatarUrl = updateUserDto.avatarUrl;
+    if(!isUndefined(updateUserDto.password)){
+      user.password = updateUserDto.password;
+    }
+
+    if(!isUndefined(updateUserDto.avatarUrl)){
+      user.avatarUrl = updateUserDto.avatarUrl;
+    }
+
+    if(!isUndefined(updateUserDto.role)){
+      user.role = updateUserDto.role;
+    }
+
     user.updatedAt = new Date().toISOString();
-    user.role = updateUserDto.role;
     return this.userRepository.save(user);
   }
 
@@ -86,7 +96,21 @@ export class UserService {
     return this.userRepository.delete({id});
   }
   
-  updateProfile(id: number, updateProfileDto: UpdateProfileDto) {
-    return this.profileService.update(id, updateProfileDto);
+  async updateProfile(id: number, updateProfileDto: UpdateProfileDto) {
+    const currentUser = await this.userRepository.findOne({
+      where: {id},
+      relations: ['profile']
+    })
+    if(!currentUser){
+      return new BadRequestException('User not found')
+    }
+    const userProfileId = currentUser?.profile?.id;
+    if(!userProfileId){
+      return new BadRequestException('User profile not found')
+    }
+
+    currentUser.updatedAt = new Date().toISOString();
+    await this.userRepository.save(currentUser);
+    return this.profileService.update(userProfileId, updateProfileDto);
   }
 }

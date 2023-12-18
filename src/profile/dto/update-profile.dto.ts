@@ -1,40 +1,40 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { CreateProfileDto } from './create-profile.dto';
-import { IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsPhoneNumber, IsPostalCode, IsString } from 'class-validator';
 
 export class UpdateProfileDto extends PartialType(CreateProfileDto) {
-    @IsString()
     @IsOptional()
+    @IsString()
     @ApiProperty({description: 'The new full name of the user'})
     fullName: string;
 
-    @IsString()
     @IsOptional()
+    @IsPhoneNumber()
     @ApiProperty({description: 'The new phone number of the user with country code'})
     phoneNumberWithCountryCode: string;
 
-    @IsString()
     @IsOptional()
+    @IsString()
     @ApiProperty({description: 'The new street of the user'})
     street: string;
 
-    @IsString()
     @IsOptional()
+    @IsNumber()
     @ApiProperty({description: 'The new house number of the user'})
-    houseNumber: string;
+    houseNumber: number;
 
-    @IsString()
     @IsOptional()
+    @IsNumber()
     @ApiProperty({description: 'The new apartment number of the user'})
-    apartmentNumber: string;
+    apartmentNumber: number;
 
-    @IsString()
     @IsOptional()
+    @IsString()
     @ApiProperty({description: 'The new city of the user'})
     city: string;
 
-    @IsString()
     @IsOptional()
+    @IsPostalCode('PL')
     @ApiProperty({description: 'The new postal code of the user'})
     postalCode: string;
 }

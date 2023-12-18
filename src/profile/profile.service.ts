@@ -4,6 +4,7 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { Profile } from './entities/profile.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { isUndefined } from 'src/helpers/isUndefined';
 
 @Injectable()
 export class ProfileService {
@@ -39,14 +40,35 @@ export class ProfileService {
     if(!profile){
       return new BadRequestException('Profile not found')
     }
+
+    if(!isUndefined(updateProfileDto.fullName)){
+      profile.fullName = updateProfileDto.fullName;
+    }
+
+    if(!isUndefined(updateProfileDto.phoneNumberWithCountryCode)){
+      profile.phoneNumberWithCountryCode = updateProfileDto.phoneNumberWithCountryCode;
+    }
+
+    if(!isUndefined(updateProfileDto.street)){
+      profile.street = updateProfileDto.street;
+    }
+
+    if(!isUndefined(updateProfileDto.houseNumber)){
+      profile.houseNumber = updateProfileDto.houseNumber;
+    }
     
-    profile.fullName = updateProfileDto.fullName;
-    profile.city = updateProfileDto.city;
-    profile.street = updateProfileDto.street;
-    profile.houseNumber = updateProfileDto.houseNumber;
-    profile.apartmentNumber = updateProfileDto.apartmentNumber;
-    profile.phoneNumberWithCountryCode = updateProfileDto.phoneNumberWithCountryCode;
-    profile.postalCode = updateProfileDto.postalCode;
+    if(!isUndefined(updateProfileDto.apartmentNumber)){
+      profile.apartmentNumber = updateProfileDto.apartmentNumber;
+    }
+    
+    if(!isUndefined(updateProfileDto.city)){
+      profile.city = updateProfileDto.city;
+    }
+
+    if(!isUndefined(updateProfileDto.postalCode)){
+      profile.postalCode = updateProfileDto.postalCode;
+    }
+
     return this.profileRepository.save(profile);
   }
 
