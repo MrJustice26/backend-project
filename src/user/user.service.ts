@@ -12,7 +12,6 @@ import { isUndefined } from 'src/helpers/isUndefined';
 
 @Injectable()
 export class UserService {
-
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(Role) private readonly roleRepository: Repository<Role>,
@@ -22,11 +21,14 @@ export class UserService {
   async create(createUserDto: CreateUserDto) {
     const DEFAULT_USER_ROLE_ID = 1;
 
-    const userWithTheSameUserName = await this.userRepository.findOneBy({username: createUserDto.username});
-    if(userWithTheSameUserName){
-      return new BadRequestException('User with the same username already exists');
+    const userWithTheSameUserName = await this.userRepository.findOneBy({
+      username: createUserDto.username,
+    });
+    if (userWithTheSameUserName) {
+      return new BadRequestException(
+        'User with the same username already exists',
+      );
     }
-
 
     const user = new User();
     user.username = createUserDto.username;
@@ -34,6 +36,7 @@ export class UserService {
     user.avatarUrl = createUserDto.avatarUrl;
     user.posts = [];
     user.comments = [];
+    user.likedPosts = [];
     user.role = DEFAULT_USER_ROLE_ID;
 
     user.profile = await this.profileService.create({
@@ -50,41 +53,45 @@ export class UserService {
   }
 
   findAll() {
-    return this.userRepository.find({relations: ['posts', 'comments', 'role']});
+    return this.userRepository.find({
+      relations: ['posts', 'comments', 'role'],
+    });
   }
 
   findOne(id: number) {
     return this.userRepository.findOne({
-      where: {id},
-      relations: ['posts', 'comments', 'role']
+      where: { id },
+      relations: ['posts', 'comments', 'role', 'likedPosts'],
     });
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
     const user = await this.userRepository.findOne({
-      where: {id},
-      relations: ['posts', 'comments', 'role']
+      where: { id },
+      relations: ['posts', 'comments', 'role'],
     });
-    if(!user){
-      return new BadRequestException('User not found')
+    if (!user) {
+      return new BadRequestException('User not found');
     }
 
-    if(updateUserDto.role !== undefined){
-      const roleExist = await this.roleRepository.findOneBy({id: updateUserDto.role});
-      if(!roleExist){
-        return new BadRequestException('Role not found')
+    if (updateUserDto.role !== undefined) {
+      const roleExist = await this.roleRepository.findOneBy({
+        id: updateUserDto.role,
+      });
+      if (!roleExist) {
+        return new BadRequestException('Role not found');
       }
     }
 
-    if(!isUndefined(updateUserDto.password)){
+    if (!isUndefined(updateUserDto.password)) {
       user.password = updateUserDto.password;
     }
 
-    if(!isUndefined(updateUserDto.avatarUrl)){
+    if (!isUndefined(updateUserDto.avatarUrl)) {
       user.avatarUrl = updateUserDto.avatarUrl;
     }
 
-    if(!isUndefined(updateUserDto.role)){
+    if (!isUndefined(updateUserDto.role)) {
       user.role = updateUserDto.role;
     }
 
@@ -93,20 +100,20 @@ export class UserService {
   }
 
   remove(id: number) {
-    return this.userRepository.delete({id});
+    return this.userRepository.delete({ id });
   }
-  
+
   async updateProfile(id: number, updateProfileDto: UpdateProfileDto) {
     const currentUser = await this.userRepository.findOne({
-      where: {id},
-      relations: ['profile']
-    })
-    if(!currentUser){
-      return new BadRequestException('User not found')
+      where: { id },
+      relations: ['profile'],
+    });
+    if (!currentUser) {
+      return new BadRequestException('User not found');
     }
     const userProfileId = currentUser?.profile?.id;
-    if(!userProfileId){
-      return new BadRequestException('User profile not found')
+    if (!userProfileId) {
+      return new BadRequestException('User profile not found');
     }
 
     currentUser.updatedAt = new Date().toISOString();

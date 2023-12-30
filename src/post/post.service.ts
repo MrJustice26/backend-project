@@ -10,17 +10,17 @@ import { isUndefined } from 'src/helpers/isUndefined';
 
 @Injectable()
 export class PostService {
-
   constructor(
     @InjectRepository(Post) private readonly postRepository: Repository<Post>,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
   async create(createPostDto: CreatePostDto) {
-
-    const user = await this.userRepository.findOneBy({id: createPostDto.creator});
-    if(!user){
-      return new BadRequestException('User not found')
+    const user = await this.userRepository.findOneBy({
+      id: createPostDto.creator,
+    });
+    if (!user) {
+      return new BadRequestException('User not found');
     }
 
     const post = new Post();
@@ -28,6 +28,7 @@ export class PostService {
     post.body = createPostDto.body;
     post.creator = createPostDto.creator;
     post.comments = [];
+    post.likedBy = [];
 
     return this.postRepository.save(post);
   }
@@ -36,44 +37,94 @@ export class PostService {
     const DEFAULT_OFFSET = 0;
     const DEFAULT_LIMIT = 15;
 
-    let limit = DEFAULT_LIMIT
-    let offset = DEFAULT_OFFSET
-    if(getAllPostQueryDto?.limit !== undefined) {
+    let limit = DEFAULT_LIMIT;
+    let offset = DEFAULT_OFFSET;
+    if (getAllPostQueryDto?.limit !== undefined) {
       limit = getAllPostQueryDto.limit;
     }
-    if(getAllPostQueryDto?.offset !== undefined) {
+    if (getAllPostQueryDto?.offset !== undefined) {
       offset = getAllPostQueryDto.offset;
     }
-    return this.postRepository.find({relations: ['comments', 'creator'], skip: offset, take: limit});
+
+    const appliedRelations = [];
+    if (getAllPostQueryDto?.withComments === 'true') {
+      appliedRelations.push('comments');
+    }
+
+    if (getAllPostQueryDto?.withCreator === 'true') {
+      appliedRelations.push('creator');
+    }
+
+    return this.postRepository.find({
+      relations: appliedRelations,
+      skip: offset,
+      take: limit,
+    });
   }
 
   async findOne(id: number): Promise<Post> {
     const receivedPost = await this.postRepository.findOne({
-      where: {id},
-      relations: ['comments', 'creator']
+      where: { id },
+      relations: ['comments', 'creator'],
     });
     return receivedPost;
   }
 
   async update(id: number, updatePostDto: UpdatePostDto): Promise<Post> {
-    const post = await this.postRepository.findOneBy({id});
-    if(!post){
+    const post = await this.postRepository.findOneBy({ id });
+    if (!post) {
       new BadRequestException('Post not found');
     }
 
-    if(!isUndefined(updatePostDto.body)){
+    if (!isUndefined(updatePostDto.body)) {
       post.body = updatePostDto.body;
     }
 
-    if(!isUndefined(updatePostDto.title)){
+    if (!isUndefined(updatePostDto.title)) {
       post.title = updatePostDto.title;
     }
-    
+
     post.updatedAt = new Date().toISOString();
     return this.postRepository.save(post);
   }
 
   remove(id: number) {
-    return this.postRepository.delete({id});
+    return this.postRepository.delete({ id });
+  }
+
+  async likePost(postId: number, userId: number) {
+    const post = await this.postRepository.findOne({
+      where: { id: postId },
+      relations: ['likedBy'],
+    });
+    if (!post) {
+      return new BadRequestException('Post not found');
+    }
+
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (!user) {
+      return new BadRequestException('User not found');
+    }
+
+    post.likedBy.push(user);
+    return this.postRepository.save(post);
+  }
+
+  async unlikePost(postId: number, userId: number) {
+    const post = await this.postRepository.findOne({
+      where: { id: postId },
+      relations: ['likedBy'],
+    });
+    if (!post) {
+      return new BadRequestException('Post not found');
+    }
+
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (!user) {
+      return new BadRequestException('User not found');
+    }
+
+    post.likedBy = post.likedBy.filter((likedUser) => likedUser.id !== userId);
+    return this.postRepository.save(post);
   }
 }
