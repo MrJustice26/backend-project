@@ -44,7 +44,7 @@ export class User {
   comments: Comment[];
 
   @ManyToOne(() => Role, (role) => role.users)
-  role: number;
+  role: Role;
 
   @OneToOne(() => Profile, { eager: true })
   @JoinColumn()

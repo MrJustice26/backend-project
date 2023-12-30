@@ -30,6 +30,16 @@ export class UserService {
       );
     }
 
+    const role = await this.roleRepository.findOne({
+      where: {
+        id: DEFAULT_USER_ROLE_ID,
+      },
+    });
+
+    if (!role) {
+      return new BadRequestException('Role not found');
+    }
+
     const user = new User();
     user.username = createUserDto.username;
     user.password = createUserDto.password;
@@ -37,7 +47,7 @@ export class UserService {
     user.posts = [];
     user.comments = [];
     user.likedPosts = [];
-    user.role = DEFAULT_USER_ROLE_ID;
+    user.role = role;
 
     user.profile = await this.profileService.create({
       fullName: undefined,
@@ -74,9 +84,9 @@ export class UserService {
       return new BadRequestException('User not found');
     }
 
-    if (updateUserDto.role !== undefined) {
+    if (updateUserDto.roleId !== undefined) {
       const roleExist = await this.roleRepository.findOneBy({
-        id: updateUserDto.role,
+        id: updateUserDto.roleId,
       });
       if (!roleExist) {
         return new BadRequestException('Role not found');
@@ -91,8 +101,17 @@ export class UserService {
       user.avatarUrl = updateUserDto.avatarUrl;
     }
 
-    if (!isUndefined(updateUserDto.role)) {
-      user.role = updateUserDto.role;
+    if (!isUndefined(updateUserDto.roleId)) {
+      const role = await this.roleRepository.findOne({
+        where: {
+          id: updateUserDto.roleId,
+        },
+      });
+
+      if (!role) {
+        return new BadRequestException('Role not found');
+      }
+      user.role = role;
     }
 
     user.updatedAt = new Date().toISOString();

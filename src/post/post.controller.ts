@@ -69,4 +69,10 @@ export class PostController {
   ) {
     return this.postService.unlikePost(id, UpdateLikePostDto.userId);
   }
+
+  @Get(':id/comments')
+  @ApiOperation({ summary: 'Get all comments by post id.' })
+  getComments(@Param('id') id: number) {
+    return this.postService.getComments(id);
+  }
 }

@@ -7,12 +7,15 @@ import { Repository } from 'typeorm';
 import { GetAllPostQueryDto } from './dto/get-all-post-query.dto';
 import { User } from 'src/user/entities/user.entity';
 import { isUndefined } from 'src/helpers/isUndefined';
+import { Comment } from 'src/comment/entities/comment.entity';
 
 @Injectable()
 export class PostService {
   constructor(
     @InjectRepository(Post) private readonly postRepository: Repository<Post>,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
+    @InjectRepository(Comment)
+    private readonly commentRepository: Repository<Comment>,
   ) {}
 
   async create(createPostDto: CreatePostDto) {
@@ -26,7 +29,7 @@ export class PostService {
     const post = new Post();
     post.title = createPostDto.title;
     post.body = createPostDto.body;
-    post.creator = createPostDto.creator;
+    post.creator = user;
     post.comments = [];
     post.likedBy = [];
     post.readingTime = this.countReadingTime(createPostDto.body);
@@ -134,5 +137,23 @@ export class PostService {
     const wordsPerMinute = 180;
     const numberOfWords = body.split(/\s/g).length;
     return Math.ceil(numberOfWords / wordsPerMinute);
+  }
+
+  async getComments(postId: number) {
+    const post = await this.postRepository.findOne({
+      where: { id: postId },
+    });
+    if (!post) {
+      return new BadRequestException('Post not found');
+    }
+
+    return this.commentRepository.find({
+      relations: ['creator'],
+      where: {
+        post: {
+          id: postId,
+        },
+      },
+    });
   }
 }

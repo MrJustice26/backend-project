@@ -31,7 +31,7 @@ export class Post {
   updatedAt: string;
 
   @ManyToOne(() => User, (user) => user.posts)
-  creator: number;
+  creator: User;
 
   @OneToMany(() => Comment, (comment) => comment.post)
   comments: Comment[];

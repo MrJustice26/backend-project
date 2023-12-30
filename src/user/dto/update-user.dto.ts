@@ -26,5 +26,5 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   @IsOptional()
   @IsNumber()
   @ApiProperty({ description: 'The new role id of the user' })
-  readonly role: number;
+  readonly roleId: number;
 }
