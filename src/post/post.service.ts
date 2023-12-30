@@ -29,6 +29,7 @@ export class PostService {
     post.creator = createPostDto.creator;
     post.comments = [];
     post.likedBy = [];
+    post.readingTime = this.countReadingTime(createPostDto.body);
 
     return this.postRepository.save(post);
   }
@@ -78,6 +79,7 @@ export class PostService {
 
     if (!isUndefined(updatePostDto.body)) {
       post.body = updatePostDto.body;
+      post.readingTime = this.countReadingTime(updatePostDto.body);
     }
 
     if (!isUndefined(updatePostDto.title)) {
@@ -126,5 +128,11 @@ export class PostService {
 
     post.likedBy = post.likedBy.filter((likedUser) => likedUser.id !== userId);
     return this.postRepository.save(post);
+  }
+
+  countReadingTime(body: string): number {
+    const wordsPerMinute = 180;
+    const numberOfWords = body.split(/\s/g).length;
+    return Math.ceil(numberOfWords / wordsPerMinute);
   }
 }

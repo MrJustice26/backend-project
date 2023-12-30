@@ -39,4 +39,7 @@ export class Post {
   @ManyToMany(() => User, (user) => user.likedPosts)
   @JoinTable()
   likedBy: User[];
+
+  @Column({ type: 'integer', default: 0 })
+  readingTime: number;
 }
