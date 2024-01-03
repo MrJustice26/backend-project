@@ -4,8 +4,8 @@ import { IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateCommentDto extends PartialType(CreateCommentDto) {
-    @IsNotEmpty()
-    @IsString()
-    @ApiProperty({description: 'The new body of the comment'})
-    readonly body: string;
+  @IsNotEmpty()
+  @IsString()
+  @ApiProperty({ description: 'The new body of the comment' })
+  readonly body: string;
 }

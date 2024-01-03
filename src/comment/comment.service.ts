@@ -19,7 +19,7 @@ export class CommentService {
 
   async create(createCommentDto: CreateCommentDto) {
     const creator = await this.userRepository.findOneBy({
-      id: createCommentDto.creator,
+      id: createCommentDto.creatorId,
     });
     if (!creator) {
       return new BadRequestException('Creator not found');
@@ -60,9 +60,6 @@ export class CommentService {
 
     if (!isUndefined(updateCommentDto.body)) {
       comment.body = updateCommentDto.body;
-    }
-
-    if (!isUndefined(updateCommentDto.creator)) {
       comment.updatedAt = new Date().toISOString();
     }
     return this.commentRepository.save(comment);
