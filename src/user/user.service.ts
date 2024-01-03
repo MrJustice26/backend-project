@@ -6,9 +6,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Role } from 'src/role/entities/role.entity';
 import { ProfileService } from 'src/profile/profile.service';
-import { CreateProfileDto } from 'src/profile/dto/create-profile.dto';
 import { UpdateProfileDto } from 'src/profile/dto/update-profile.dto';
 import { isUndefined } from 'src/helpers/isUndefined';
+import { UserCredentialsService } from 'src/user-credentials/user-credentials.service';
 
 @Injectable()
 export class UserService {
@@ -16,6 +16,7 @@ export class UserService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(Role) private readonly roleRepository: Repository<Role>,
     private readonly profileService: ProfileService,
+    private readonly userCredentialsService: UserCredentialsService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -40,9 +41,14 @@ export class UserService {
       return new BadRequestException('Role not found');
     }
 
+    const isUserWithTheSameEmailExist =
+      await this.userCredentialsService.findByEmail(createUserDto.email);
+    if (isUserWithTheSameEmailExist) {
+      return new BadRequestException('User with the same email already exists');
+    }
+
     const user = new User();
     user.username = createUserDto.username;
-    user.password = createUserDto.password;
     user.avatarUrl = createUserDto.avatarUrl;
     user.posts = [];
     user.comments = [];
@@ -57,6 +63,11 @@ export class UserService {
       apartmentNumber: undefined,
       phoneNumberWithCountryCode: undefined,
       postalCode: undefined,
+    });
+
+    user.credentials = await this.userCredentialsService.create({
+      email: createUserDto.email,
+      password: createUserDto.password,
     });
 
     return this.userRepository.save(user);
@@ -94,7 +105,9 @@ export class UserService {
     }
 
     if (!isUndefined(updateUserDto.password)) {
-      user.password = updateUserDto.password;
+      this.userCredentialsService.update(user.credentials.id, {
+        password: updateUserDto.password,
+      });
     }
 
     if (!isUndefined(updateUserDto.avatarUrl)) {
