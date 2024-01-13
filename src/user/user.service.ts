@@ -3,7 +3,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import { Role } from 'src/role/entities/role.entity';
 import { ProfileService } from 'src/profile/profile.service';
 import { UpdateProfileDto } from 'src/profile/dto/update-profile.dto';
@@ -151,5 +151,14 @@ export class UserService {
     currentUser.updatedAt = new Date().toISOString();
     await this.userRepository.save(currentUser);
     return this.profileService.update(userProfileId, updateProfileDto);
+  }
+
+  getUserWithCredentialsBy(
+    where: FindOptionsWhere<User> | FindOptionsWhere<User>[],
+  ) {
+    return this.userRepository.findOne({
+      where,
+      relations: ['credentials'],
+    });
   }
 }
