@@ -63,8 +63,8 @@ export class PostController {
   @UseGuards(JwtAuthGuard)
   @Patch(':id/like')
   @ApiOperation({ summary: 'Like post by id.' })
-  like(@Param('id') id: number, @Body() UpdateLikePostDto: UpdateLikePostDto) {
-    return this.postService.likePost(id, UpdateLikePostDto.userId);
+  like(@Param('id') id: number, @Body() updateLikePostDto: UpdateLikePostDto) {
+    return this.postService.likePost(id, updateLikePostDto.userId);
   }
 
   @UseGuards(JwtAuthGuard)

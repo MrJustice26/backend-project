@@ -26,9 +26,10 @@ export class AuthService {
       userWithCredentials.credentials.password,
     );
 
+    if (!isPasswordValid) return null;
+
     userWithCredentials.credentials.password = undefined;
 
-    if (!isPasswordValid) return null;
     return userWithCredentials;
   }
 
@@ -38,33 +39,49 @@ export class AuthService {
       sub: user.id,
     };
 
-    const access_token = this.jwtService.sign(payload, { expiresIn: '1h' });
-    // const refresh_token = this.jwtService.sign(payload, { expiresIn: '7d' });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '1h' });
+    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
 
     return {
-      access_token,
-      // refresh_token,
+      user: user,
+      tokens: {
+        accessToken,
+        refreshToken,
+      },
     };
   }
 
   // TODO: Dokoncz refresh i te cookies
-  // async refresh(token: string) {
-  //   try {
-  //     const decoded = this.jwtService.verify(token);
-  //     const user = await this.userService.findOne(decoded.sub);
+  async refresh(providenRefreshToken: string) {
+    try {
+      console.log(providenRefreshToken);
+      const decoded = this.jwtService.verify(providenRefreshToken);
+      const user = await this.userService.findOne(decoded.sub);
 
-  //     const payload = {
-  //       username: user.username,
-  //       sub: user.id,
-  //     };
+      const payload = {
+        username: user.username,
+        sub: user.id,
+      };
 
-  //     const access_token = this.jwtService.sign(payload, { expiresIn: '1h' });
+      const accessToken = this.jwtService.sign(payload, { expiresIn: '1h' });
+      const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
 
-  //     return {
-  //       access_token,
-  //     };
-  //   } catch (error) {
-  //     throw new UnauthorizedException('Invalid refresh token');
-  //   }
-  // }
+      return {
+        accessToken,
+        refreshToken,
+      };
+    } catch (error) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+  }
+
+  async getUserFromAccessToken(userJwt: { userId: string; username: string }) {
+    try {
+      const user = await this.userService.findOne(+userJwt?.userId);
+      user.credentials.password = undefined;
+      return user;
+    } catch (error) {
+      throw new UnauthorizedException('Invalid access token');
+    }
+  }
 }
