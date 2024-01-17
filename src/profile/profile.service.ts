@@ -8,10 +8,10 @@ import { isUndefined } from 'src/helpers/isUndefined';
 
 @Injectable()
 export class ProfileService {
-
   constructor(
-    @InjectRepository(Profile) private readonly profileRepository: Repository<Profile>,
-  ){}
+    @InjectRepository(Profile)
+    private readonly profileRepository: Repository<Profile>,
+  ) {}
 
   create(createProfileDto: CreateProfileDto) {
     const profile = new Profile();
@@ -20,7 +20,8 @@ export class ProfileService {
     profile.street = createProfileDto.street;
     profile.houseNumber = createProfileDto.houseNumber;
     profile.apartmentNumber = createProfileDto.apartmentNumber;
-    profile.phoneNumberWithCountryCode = createProfileDto.phoneNumberWithCountryCode;
+    profile.phoneNumberWithCountryCode =
+      createProfileDto.phoneNumberWithCountryCode;
     profile.postalCode = createProfileDto.postalCode;
     return this.profileRepository.save(profile);
   }
@@ -31,41 +32,42 @@ export class ProfileService {
 
   findOne(id: number) {
     return this.profileRepository.findOne({
-      where: {id}
+      where: { id },
     });
   }
 
   async update(id: number, updateProfileDto: UpdateProfileDto) {
-    const profile = await this.profileRepository.findOneBy({id});
-    if(!profile){
-      return new BadRequestException('Profile not found')
+    const profile = await this.profileRepository.findOneBy({ id });
+    if (!profile) {
+      return new BadRequestException('Profile not found');
     }
 
-    if(!isUndefined(updateProfileDto.fullName)){
+    if (!isUndefined(updateProfileDto.fullName)) {
       profile.fullName = updateProfileDto.fullName;
     }
 
-    if(!isUndefined(updateProfileDto.phoneNumberWithCountryCode)){
-      profile.phoneNumberWithCountryCode = updateProfileDto.phoneNumberWithCountryCode;
+    if (!isUndefined(updateProfileDto.phoneNumberWithCountryCode)) {
+      profile.phoneNumberWithCountryCode =
+        updateProfileDto.phoneNumberWithCountryCode;
     }
 
-    if(!isUndefined(updateProfileDto.street)){
+    if (!isUndefined(updateProfileDto.street)) {
       profile.street = updateProfileDto.street;
     }
 
-    if(!isUndefined(updateProfileDto.houseNumber)){
+    if (!isUndefined(updateProfileDto.houseNumber)) {
       profile.houseNumber = updateProfileDto.houseNumber;
     }
-    
-    if(!isUndefined(updateProfileDto.apartmentNumber)){
+
+    if (!isUndefined(updateProfileDto.apartmentNumber)) {
       profile.apartmentNumber = updateProfileDto.apartmentNumber;
     }
-    
-    if(!isUndefined(updateProfileDto.city)){
+
+    if (!isUndefined(updateProfileDto.city)) {
       profile.city = updateProfileDto.city;
     }
 
-    if(!isUndefined(updateProfileDto.postalCode)){
+    if (!isUndefined(updateProfileDto.postalCode)) {
       profile.postalCode = updateProfileDto.postalCode;
     }
 
@@ -73,6 +75,6 @@ export class ProfileService {
   }
 
   remove(id: number) {
-    return this.profileRepository.delete({id});
+    return this.profileRepository.delete({ id });
   }
 }

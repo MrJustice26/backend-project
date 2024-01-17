@@ -2,6 +2,7 @@ import { Comment } from 'src/comment/entities/comment.entity';
 import { Post } from 'src/post/entities/post.entity';
 import { Profile } from 'src/profile/entities/profile.entity';
 import { Role } from 'src/role/entities/role.entity';
+import { UserCredentials } from 'src/user-credentials/entities/user-credentials.entity';
 import {
   Column,
   Entity,
@@ -21,9 +22,6 @@ export class User {
 
   @Column({ type: 'varchar', length: 50 })
   username: string;
-
-  @Column({ type: 'varchar', length: 255 })
-  password: string;
 
   @Column({ type: 'text', nullable: true })
   avatarUrl: string;
@@ -53,4 +51,8 @@ export class User {
   @ManyToMany(() => Post, (post) => post.likedBy)
   @JoinTable()
   likedPosts: Post[];
+
+  @OneToOne(() => UserCredentials)
+  @JoinColumn()
+  credentials: UserCredentials;
 }

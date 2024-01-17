@@ -1,13 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateUserDto } from './create-user.dto';
-import {
-  IsNotEmpty,
-  IsNumber,
-  IsNumberString,
-  IsOptional,
-  IsString,
-  Validate,
-} from 'class-validator';
+import { IsNumber, IsOptional, IsString, Validate } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { PasswordFormatValidator } from '../validators/password.validator';
 

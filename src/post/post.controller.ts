@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -14,6 +15,7 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { GetAllPostQueryDto } from './dto/get-all-post-query.dto';
 import { ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { UpdateLikePostDto } from './dto/update-like-post.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('post')
 export class PostController {
@@ -37,30 +39,35 @@ export class PostController {
     return this.postService.findAll(getAllPostQueryDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   @ApiOperation({ summary: 'Get post by id.' })
   findOne(@Param('id') id: number) {
     return this.postService.findOne(+id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   @ApiOperation({ summary: 'Update post by id.' })
   update(@Param('id') id: number, @Body() updatePostDto: UpdatePostDto) {
     return this.postService.update(+id, updatePostDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   @ApiOperation({ summary: 'Delete post by id.' })
   remove(@Param('id') id: number) {
     return this.postService.remove(+id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id/like')
   @ApiOperation({ summary: 'Like post by id.' })
-  like(@Param('id') id: number, @Body() UpdateLikePostDto: UpdateLikePostDto) {
-    return this.postService.likePost(id, UpdateLikePostDto.userId);
+  like(@Param('id') id: number, @Body() updateLikePostDto: UpdateLikePostDto) {
+    return this.postService.likePost(id, updateLikePostDto.userId);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id/unlike')
   @ApiOperation({ summary: 'Like post by id.' })
   unlike(
@@ -70,6 +77,7 @@ export class PostController {
     return this.postService.unlikePost(id, UpdateLikePostDto.userId);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id/comments')
   @ApiOperation({ summary: 'Get all comments by post id.' })
   getComments(@Param('id') id: number) {
