@@ -158,7 +158,7 @@ export class UserService {
   ) {
     return this.userRepository.findOne({
       where,
-      relations: ['credentials'],
+      relations: ['posts', 'comments', 'role', 'likedPosts', 'credentials'],
     });
   }
 }

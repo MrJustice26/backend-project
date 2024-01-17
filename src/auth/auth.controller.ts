@@ -14,7 +14,7 @@ import { AuthService } from './auth.service';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // TODO: Daj potem refresh token
+  // TODO: Przy login zwraca nam się cały user, przy refresh tylko sama encja z credentials. Ustalić czy zwracamy na początku samą encję user, czy cały user
   @UseGuards(AuthGuard('local'))
   @Post('login')
   async login(@Request() req, @Response() res) {
@@ -37,6 +37,7 @@ export class AuthController {
     res.clearCookie('refreshToken');
     res.json({
       message: 'Logged out successfully',
+      statusCode: 200,
     });
   }
 

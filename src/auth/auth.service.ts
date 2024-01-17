@@ -75,9 +75,9 @@ export class AuthService {
     }
   }
 
-  async getUserFromAccessToken(userJwt: { userId: string; username: string }) {
+  async getUserFromAccessToken(userJwt: { userId: number; username: string }) {
     try {
-      const user = await this.userService.findOne(+userJwt?.userId);
+      const user = await this.userService.findOne(userJwt.userId);
       user.credentials.password = undefined;
       return user;
     } catch (error) {
