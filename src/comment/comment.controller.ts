@@ -6,11 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { PageOptionsDto } from 'src/meta/dto';
 
 @Controller('comment')
 export class CommentController {
@@ -24,8 +26,10 @@ export class CommentController {
 
   @Get()
   @ApiOperation({ summary: 'Get all comments.' })
-  findAll() {
-    return this.commentService.findAll();
+  @ApiQuery({ name: 'take', required: false, type: 'number' })
+  @ApiQuery({ name: 'skip', required: false, type: 'number' })
+  findAll(@Query() pageOptionsDto: PageOptionsDto) {
+    return this.commentService.findAll(pageOptionsDto);
   }
 
   @Get(':id')

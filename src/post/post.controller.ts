@@ -12,10 +12,10 @@ import {
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { GetAllPostQueryDto } from './dto/get-all-post-query.dto';
 import { ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { UpdateLikePostDto } from './dto/update-like-post.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { PageOptionsDto } from 'src/meta/dto';
 
 @Controller('post')
 export class PostController {
@@ -29,14 +29,12 @@ export class PostController {
   @Get()
   @ApiOperation({
     summary:
-      'Get all posts. You can use limit and offset query params to paginate.',
+      'Get all posts. You can use take and skip query params to paginate.',
   })
-  @ApiQuery({ name: 'limit', required: false, type: 'number' })
-  @ApiQuery({ name: 'offset', required: false, type: 'number' })
-  @ApiQuery({ name: 'withComments', required: false, type: 'boolean' })
-  @ApiQuery({ name: 'withCreator', required: false, type: 'boolean' })
-  findAll(@Query() getAllPostQueryDto: GetAllPostQueryDto) {
-    return this.postService.findAll(getAllPostQueryDto);
+  @ApiQuery({ name: 'take', required: false, type: 'number' })
+  @ApiQuery({ name: 'skip', required: false, type: 'number' })
+  findAll(@Query() pageOptionsDto: PageOptionsDto) {
+    return this.postService.findAll(pageOptionsDto);
   }
 
   @UseGuards(JwtAuthGuard)

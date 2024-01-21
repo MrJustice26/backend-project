@@ -7,6 +7,7 @@ import { Comment } from './entities/comment.entity';
 import { Post } from 'src/post/entities/post.entity';
 import { User } from 'src/user/entities/user.entity';
 import { isUndefined } from 'src/helpers/isUndefined';
+import { PageOptionsDto, PageDto, PageMetaDto } from 'src/meta/dto';
 
 @Injectable()
 export class CommentService {
@@ -39,8 +40,21 @@ export class CommentService {
     return this.commentRepository.save(comment);
   }
 
-  findAll() {
-    return this.commentRepository.find({ relations: ['creator', 'post'] });
+  async findAll(pageOptionsDto: PageOptionsDto) {
+    const queryBuilder = this.commentRepository.createQueryBuilder('comment');
+
+    queryBuilder
+      .orderBy('comment.createdAt', pageOptionsDto.order)
+      .skip(pageOptionsDto.skip)
+      .take(pageOptionsDto.take)
+      .leftJoinAndSelect('comment.creator', 'creator')
+      .leftJoinAndSelect('comment.post', 'post');
+
+    const itemCount = await queryBuilder.getCount();
+    const { entities } = await queryBuilder.getRawAndEntities();
+
+    const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto });
+    return new PageDto(entities, pageMetaDto);
   }
 
   findOne(id: number) {

@@ -4,10 +4,11 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { Post } from './entities/post.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { GetAllPostQueryDto } from './dto/get-all-post-query.dto';
 import { User } from 'src/user/entities/user.entity';
 import { isUndefined } from 'src/helpers/isUndefined';
 import { Comment } from 'src/comment/entities/comment.entity';
+import { PageOptionsDto, PageMetaDto, PageDto } from 'src/meta/dto';
+import { countReadingTime } from 'src/helpers/countReadingTime';
 
 @Injectable()
 export class PostService {
@@ -32,38 +33,26 @@ export class PostService {
     post.creator = user;
     post.comments = [];
     post.likedBy = [];
-    post.readingTime = this.countReadingTime(createPostDto.body);
+    post.readingTime = countReadingTime(createPostDto.body);
 
     return this.postRepository.save(post);
   }
 
-  findAll(getAllPostQueryDto: GetAllPostQueryDto): Promise<Post[]> {
-    const DEFAULT_OFFSET = 0;
-    const DEFAULT_LIMIT = 15;
+  async findAll(pageOptionsDto: PageOptionsDto): Promise<PageDto<Post>> {
+    const queryBuilder = this.postRepository.createQueryBuilder('post');
 
-    let limit = DEFAULT_LIMIT;
-    let offset = DEFAULT_OFFSET;
-    if (getAllPostQueryDto?.limit !== undefined) {
-      limit = getAllPostQueryDto.limit;
-    }
-    if (getAllPostQueryDto?.offset !== undefined) {
-      offset = getAllPostQueryDto.offset;
-    }
+    queryBuilder
+      .orderBy('post.createdAt', pageOptionsDto.order)
+      .skip(pageOptionsDto.skip)
+      .take(pageOptionsDto.take)
+      .leftJoinAndSelect('post.creator', 'creator')
+      .leftJoinAndSelect('post.comments', 'comments');
 
-    const appliedRelations = [];
-    if (getAllPostQueryDto?.withComments === 'true') {
-      appliedRelations.push('comments');
-    }
+    const itemCount = await queryBuilder.getCount();
+    const { entities } = await queryBuilder.getRawAndEntities();
 
-    if (getAllPostQueryDto?.withCreator === 'true') {
-      appliedRelations.push('creator');
-    }
-
-    return this.postRepository.find({
-      relations: appliedRelations,
-      skip: offset,
-      take: limit,
-    });
+    const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto });
+    return new PageDto(entities, pageMetaDto);
   }
 
   async findOne(id: number): Promise<Post> {
@@ -82,7 +71,7 @@ export class PostService {
 
     if (!isUndefined(updatePostDto.body)) {
       post.body = updatePostDto.body;
-      post.readingTime = this.countReadingTime(updatePostDto.body);
+      post.readingTime = countReadingTime(updatePostDto.body);
     }
 
     if (!isUndefined(updatePostDto.title)) {
@@ -131,12 +120,6 @@ export class PostService {
 
     post.likedBy = post.likedBy.filter((likedUser) => likedUser.id !== userId);
     return this.postRepository.save(post);
-  }
-
-  countReadingTime(body: string): number {
-    const wordsPerMinute = 180;
-    const numberOfWords = body.split(/\s/g).length;
-    return Math.ceil(numberOfWords / wordsPerMinute);
   }
 
   async getComments(postId: number) {
